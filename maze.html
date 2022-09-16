@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Maze</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+body {
+	background-color:rgb(0,0,100); 
+	color: rgb(100,100,200);
+	font-family:sans-serif; 
+	text-align:center;
+}
+#all {outline:0x dotted red; width:95vw; height:90vh; }
+#all h1{
+	font-size:1rem;  
+}
+
+#all h2 {
+	font-size:1.2rem;
+	text-shadow:2px -2px 2px rgb(200,200,200); 
+}
+
+#all main div {
+	font-size:3vh; 
+	padding:2vh; 
+	border: 0.2vh solid rgb(100,100,200);
+	margin:3vh; 
+	border-radius:2vh;
+	background-color:rgb(0,0,15	0); 
+	box-shadow:2px 2px 10px rgb(50,0,0);
+}
+
+.pathElement {
+	background-color: rgb(220,150,10);
+	xmin-width:20px;
+	xmin-height:20px;
+	position:absolute;	
+	border-radius:20px;
+	
+}
+main {	
+	margin:auto;
+	position:relative;
+}
+</style>
+
+
+<body>
+<div id="all">
+<h1>Proszę zablokować telefon pionowo</h1>
+<h2>Wybierz rozmiar labiryntu</h2>
+</header>
+<main>
+<div>5x7</div>
+<div>5x8</div>
+<div>5x9</div>
+<div>6x8</div>
+<div>6x9</div>
+<div>6x10</div>
+<div>6x11</div>
+</main>
+</div>
+
+<script>
+let maze=false;
+let totWidth;
+let totHeight;
+function getMazeError(d)
+{
+	document.querySelector('body').innerHTML=d;
+}
+
+function getMaze(width,height){
+	let ajax=new XMLHttpRequest();
+	
+	ajax.open("POST",`https://tales.ms.polsl.pl/marek.zabka/spec/maze.php?width=${width}&height=${height}`,true);
+	//ajax.open("POST",`maze.php?width=${width}&height=${height}`,true);
+	ajax.onreadystatechange=function(){
+		if(ajax.readyState==4 && ajax.status==200)
+		{
+			console.log(ajax.responseText);
+			try{
+				maze=JSON.parse(ajax.responseText); // let nie można tu
+				let ob=document.querySelector('#all');		
+				totWidth  = ob.offsetWidth-10;
+				totHeight = ob.offsetHeight-10;
+				
+				ob.innerHTML='';
+				ob.id="mazeIn";
+				// ustalenie szerokości ekranu i wysokości
+				// UWAGA: zakładamy, że maksymalnie canvas ( w przykładzi tu -- div obejmujący labirynt)
+				// ma rozmiary totWidth x totHeight 
+				// druga osoba może odczytać poprzez canvas.offsetWidth,  canvas.offsetheight, (patrz przykład)
+				// cały obszar (może mniejszy) jest podzielony na kwadraty liczba:  maze.width, maze.height 
+				// + dodatkowe brzegowe połówki, patrz rys. dodany na platformie PZE
+				// krawędzie są na brzegach 
+				// tworzymy nowy element
+				
+				
+				
+				requestAnimationFrame(function(){ drawMaze(); moveBull();});
+			}
+			catch (r){
+				console.log("error -- bad maze");
+				getMazeError('error -- bad maze');
+				maze=false;
+			}
+		}
+		else if(ajax.readyState==4)
+		{
+			getMazeError('error -- ajax.status='+ajax.status);
+		}
+	};
+	ajax.send();
+}
+
+let ob=document.querySelectorAll('main div');
+ob[0].addEventListener('click',function(){getMaze(5,7);},'true');
+ob[1].addEventListener('click',function(){getMaze(5,8);},'true');
+ob[2].addEventListener('click',function(){getMaze(5,9);},'true');
+ob[3].addEventListener('click',function(){getMaze(6,8);},'true');
+ob[4].addEventListener('click',function(){getMaze(6,9);},'true');
+ob[5].addEventListener('click',function(){getMaze(6,10);},'true');
+ob[6].addEventListener('click',function(){getMaze(6,11);},'true');
+
+
+function draw(){console.log('ok');}
+
+</script>
+
+<script src="drawMaze.js"></script>
+<script src="moveBull.js"></script>
+
+</body>
+</html>
